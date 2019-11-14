@@ -57,6 +57,16 @@ if [ $? -eq 0 ];then
         if [[ "$line" =~ "location" ]];then
             location=$(echo $line|awk '{print $2}')
             echo $user,$status,$file,$speed,$clientHost,$clientIP,$serverIP,$serverPort,$protocol,$location
+            user=""
+            status=""
+            file=""
+            speed=""
+            clientHost=""
+            clientIP=""
+            serverIP=""
+            serverPort=""
+            protocol=""
+            location=""
         fi
         # if [[ "$line" =~ "^$" || "$line" =~ "^Service class" ]];then
         #     break
