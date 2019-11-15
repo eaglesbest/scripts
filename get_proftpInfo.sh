@@ -1,6 +1,5 @@
 #!/bin/bash
 
-res=$(/usr/local/proftpd/bin/ftpwho -v)
 user=""
 status=""
 file=""
@@ -11,13 +10,15 @@ serverIP=""
 serverPort=""
 protocol=""
 location=""
+res=$(/usr/local/proftpd/bin/ftpwho -v|sed 's/^$/#####/g')
+#echo "$res"
 if [ $? -eq 0 ];then
     lastline=$(echo "$res" | tail -n1)
     if [ "$lastline" == "no users connected" ];then
         echo "no user"
         exit
     fi
-    lineTotal=$(echo "$res"|wc -l)
+    #lineTotal=$(echo "$res"|wc -l)
     userNum=$(echo "$lastline"|awk '{print $4}')
     #echo $userNum
     #修改系统默认的分隔符
@@ -34,6 +35,10 @@ if [ $? -eq 0 ];then
             if [[ "$line" =~ "idle" ]];then
                 status="idle"
                 file="Null"
+            elif [[ "$line" =~ "authenticating" ]];then
+                user=$(echo "$line"|awk -F'[()]' '{print $2}')
+                status="authenticating"
+                file="Null"   
             else
                 status=$(echo "$line"|awk -F'[()]' '{print $NF}'|awk '{print $1}')
                 file=$(echo "$line"|awk '{print $NF}')
@@ -56,6 +61,8 @@ if [ $? -eq 0 ];then
         fi
         if [[ "$line" =~ "location" ]];then
             location=$(echo $line|awk '{print $2}')
+        fi
+        if [[ "$line" =~ "#####" ]];then
             echo $user,$status,$file,$speed,$clientHost,$clientIP,$serverIP,$serverPort,$protocol,$location
             user=""
             status=""
@@ -68,9 +75,8 @@ if [ $? -eq 0 ];then
             protocol=""
             location=""
         fi
-        # if [[ "$line" =~ "^$" || "$line" =~ "^Service class" ]];then
-        #     break
-        # fi
     done 
     IFS="$oldifs"
+else
+    echo "Error:$res"
 fi
